@@ -1,0 +1,6 @@
+*logfile
+*.8mer
+*.prob
+*.train
+*.sum
+*.numNonZero
