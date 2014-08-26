@@ -71,8 +71,8 @@ USEARCH7=usearch7
 FASTTREE=FastTreeMP
 
 #PATH to Trimmomatic jar file
-TRIMMOMATIC=/path/to/trimmomatic-0.30.jar
+TRIMMOMATIC=/path/to/trimmomatic-0.32.jar
 
 #Advanced settings. Do not modify unless you know what you are doing.
-TORNADO2=/path/to/IMTORNADO-2.0.0
+TORNADO2=/path/to/IM-TORNADO-2.0.2
 DATA=$TORNADO2/data
