@@ -1,8 +1,15 @@
 # IM-TORNADO: A pipeline for 16S reads from paired-end libraries
 
-This is the documentation for the IM_TORNADO pipeline, currently at version 2.0.0
+This is the documentation for the IM_TORNADO pipeline, currently at version 2.0.1
 
 Documentation is being written and will be updated as it becomes ready.
+
+## Changelog
+
+### Version 2.0.1
+
+* Fix hardcoded parameters
+* Minor bugfixes
 
 ## Requirements
 
