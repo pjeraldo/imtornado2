@@ -1,6 +1,6 @@
 # IM-TORNADO: A pipeline for 16S reads from paired-end libraries
 
-This is the documentation for the IM_TORNADO pipeline, currently at version 2.0.1
+This is the documentation for the IM_TORNADO pipeline, currently at version 2.0.2
 
 Documentation is being written and will be updated as it becomes ready.
 
@@ -20,19 +20,19 @@ Documentation is being written and will be updated as it becomes ready.
 
 ## Requirements
 
-IM_TORNADO was designed to run on Linux systems. It most likely can run in Mac OSX too, if the dependendies can run in OSX (testing is planned). Windows is not supported (and it may be difficult or impossible to support).
+IM_TORNADO was designed to run on Linux systems. It can run in OSX too (tested only in Mavericks). Windows is not supported (and it may be difficult or impossible to support).
 
 IM-TORNADO depends on the following programs to function:
 
 * [USEARCH](http://drive5.com/usearch "USEARCH website") (version 7.0 and above)
 * [mothur](http://mothur.org "mothur website") (version 1.28 and above)
 * [FastTree](http://www.microbesonline.org/fasttree "FastTree website")
-* [genometools](http"//genometools.org "genometools website")
+* [genometools](http://genometools.org "genometools website")
 * [Infernal](http://infernal.janelia.edu "Infernal website") (version 1.1)
 * [Trimmomatic](http://usadellab.org/cms/?page=trimmomatic "Trimmomatic website") (version 0.28 and above)
 * python (version 2.7, version 3 and higher not supported)
 * java (for Trimmomatic to work)
-* sed and awk
+* perl, sed and awk
 
 And the following python libraries are required:
 
