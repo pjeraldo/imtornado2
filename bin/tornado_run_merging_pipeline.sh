@@ -3,7 +3,7 @@
 #copyright = "Copyright 2014, Mayo Foundation for Medical Education and Research "
 #credits = "Patricio Jeraldo,  Nicholas Chia"
 #license = "GPL"
-#version = "2.0.1"
+#version = "2.0.2"
 #maintainer = "Patricio Jeraldo"
 #email = "jeraldo.patricio@mayo.edu"
 #status = "Alpha"

@@ -4,3 +4,4 @@
 *.train
 *.sum
 *.numNonZero
+*.bak
