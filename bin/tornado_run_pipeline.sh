@@ -111,8 +111,10 @@ tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R1.fasta ${PREFIX}_R1.c
 tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R2.fasta ${PREFIX}_R2.common.fasta
 #flatten out the reads
 echo "Flatten read files..."
-cat ${PREFIX}_R1.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_R1.common.flat.fasta
-cat ${PREFIX}_R2.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_R2.common.flat.fasta
+#cat ${PREFIX}_R1.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_R1.common.flat.fasta
+cat ${PREFIX}_R1.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/'| tr -d '\n'| perl -pe 's/xXx/\n/g'| sed '/^$/d' > ${PREFIX}_R1.common.flat.fasta
+#cat ${PREFIX}_R2.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_R2.common.flat.fasta
+cat ${PREFIX}_R2.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/'| tr -d '\n'| perl -pe 's/xXx/\n/g'| sed '/^$/d' > ${PREFIX}_R2.common.flat.fasta
 
 #Strip out the R2 reads from their IDs
 #cat ${PREFIX}_R2.common.flat.fasta | sed -n '2~2p'| sed 's/^/\n/' > ${PREFIX}_R2.3prime.txt
@@ -120,10 +122,11 @@ cat ${PREFIX}_R2.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| s
 #and concatenate
 echo "Concatenate read pairs"
 #concatenate padded
-paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | sed '1~2 s/N>.*//' > ${PREFIX}.padded.fasta
+#paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | sed '1~2 s/N>.*//' > ${PREFIX}.padded.fasta
+paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | awk 'NR%2 ==0; NR%2 ==1 {sub(/N.*/,""); print}' > ${PREFIX}.padded.fasta
 #now remove the pad to make the paired read
-sed '2~2 s/N//' ${PREFIX}.padded.fasta > ${PREFIX}_paired.fasta
-
+#sed '2~2 s/N//' ${PREFIX}.padded.fasta > ${PREFIX}_paired.fasta
+awk 'NR%2 == 1; NR%2 == 0 {sub(/N/,""); print}' ${PREFIX}.padded.fasta > ${PREFIX}_paired.fasta
 
 #OTU R1 and R2, separately
 #dereplicate
@@ -176,10 +179,10 @@ tornado_otu_renamer.py ${PREFIX}_R2.otus.fasta ${PREFIX}_R2.otus2.fasta
 tornado_otu_renamer.py ${PREFIX}_paired.otus.fasta ${PREFIX}_paired.otus2.fasta
 #ok, this is weird... for now extract the name pairings (OTU and original ID)
 #this is only for paired... we will use it for taxonomy and alignment
-grep ">" ${PREFIX}_paired.otus2.fasta | tr -d '>'| tr ' ' '\t'| sed 's/;.*// ; s/\t.*=/\t/' > ${PREFIX}_paired.otu_id.map
+grep ">" ${PREFIX}_paired.otus2.fasta | tr -d '>'|  sed 's/;.*// ; s/ .*=/ /' > ${PREFIX}_paired.otu_id.map
 
 #get only the original ids
-cut -f 2 ${PREFIX}_paired.otu_id.map > ${PREFIX}_paired.original.accnos
+cut -f 2 -d ' ' ${PREFIX}_paired.otu_id.map > ${PREFIX}_paired.original.accnos
 #and pick it from the gapped read set
 
 tornado_read_picker.py ${PREFIX}_paired.original.accnos ${PREFIX}.padded.fasta ${PREFIX}_paired.otus.gapped.fasta
@@ -209,7 +212,7 @@ tornado_read_remover.py bad_taxonomy_R1.accnos ${PREFIX}_R1.otus2.fasta ${PREFIX
 tornado_read_remover.py bad_taxonomy_R2.accnos ${PREFIX}_R2.otus2.fasta ${PREFIX}_R2.otus3.fasta
 tornado_read_remover.py bad_taxonomy_paired.accnos ${PREFIX}_paired.otus2.fasta ${PREFIX}_paired.otus3.fasta
 #In the paired set, prepare to align separately
-grep ">" ${PREFIX}_paired.otus3.fasta | tr -d '>'| tr ' ' '\t'| sed 's/;.*// ; s/\t.*=/\t/' | awk '{print $2"\t"$1}' > ${PREFIX}_paired.align.map
+grep ">" ${PREFIX}_paired.otus3.fasta | tr -d '>'| sed 's/;.*// ; s/ .*=/ /' | awk '{print $2"\t"$1}' > ${PREFIX}_paired.align.map
 #get the ids to look for in the files...
 cut -f 1 ${PREFIX}_paired.align.map > ${PREFIX}.to_align.accnos
 #get those IDs from the original files
@@ -291,13 +294,15 @@ tornado_read_picker.py ${PREFIX}.aligned.common.accnos ${PREFIX}_paired.R1.align
 tornado_read_picker.py ${PREFIX}.aligned.common.accnos ${PREFIX}_paired.R2.aligned.fasta ${PREFIX}_paired.R2.aligned.common.fasta
 
 #flatten reads
-cat ${PREFIX}_paired.R1.aligned.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R1.aligned.flat.fasta
-cat ${PREFIX}_paired.R2.aligned.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R2.aligned.flat.fasta
+#cat ${PREFIX}_paired.R1.aligned.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R1.aligned.flat.fasta
+cat ${PREFIX}_paired.R1.aligned.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/' | tr -d '\n' | perl -pe 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R1.aligned.flat.fasta 
+#cat ${PREFIX}_paired.R2.aligned.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R2.aligned.flat.fasta
+cat ${PREFIX}_paired.R2.aligned.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/' | tr -d '\n' | perl -pe 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R2.aligned.flat.fasta
 
 #and concatenate
 echo "Concatenate read pairs"
-paste -d 'N' ${PREFIX}_paired.R1.aligned.flat.fasta ${PREFIX}_paired.R2.aligned.flat.fasta| sed '1~2 s/N>.*//'| sed '2~2 s/N//' > ${PREFIX}_paired.aligned.fasta
-
+#paste -d 'N' ${PREFIX}_paired.R1.aligned.flat.fasta ${PREFIX}_paired.R2.aligned.flat.fasta| sed '1~2 s/N>.*//'| sed '2~2 s/N//' > ${PREFIX}_paired.aligned.fasta
+paste -d 'N' ${PREFIX}_paired.R1.aligned.flat.fasta ${PREFIX}_paired.R2.aligned.flat.fasta| awk 'NR%2 == 1 {sub(/N>.*/,""); print}; NR%2 == 0 {sub(/N/,""); print}' > ${PREFIX}_paired.aligned.fasta
 echo "Make trees"
 #now we can tree
 OMP_NUM_THREADS=$NPROC $FASTTREE -nt -gtr -gamma -spr 4 -mlacc 2 -slownni -out ${PREFIX}_R1.tree ${PREFIX}_R1.aligned.fasta
@@ -426,6 +431,8 @@ tornado_make_biom_table.py ${PREFIX}_paired.otus.txt ../$MAPPING ${PREFIX}_paire
 
 #copy the failures to the results
 cp ${PREFIX}*failures.txt ../$RESULTS
+#copy the OTUs to the results too 
+cp ${PREFIX}_*otus.txt ../$RESULTS
 
 echo "Copy results"
 #and copy the bioms into the results file
