@@ -2,7 +2,7 @@
 
 This is the documentation for the IM_TORNADO pipeline, currently at version 2.0.2
 
-Documentation is being written and will be updated as it becomes ready.
+Documentation will be available in [Read the Docs](http://readthedocs.org) soon.
 
 ## Changelog
 
@@ -100,4 +100,4 @@ Now you can use your BIOM, tree and metadata files for proper statistical analys
 
 ## How to cite
 
-We do not have a proper manuscript for citations yet. The manuscript was submitted on February 5, 2014. In the meantime, please refer to this sourceforge project page.
+We do not have a proper manuscript for citations yet. The manuscript was submitted on May 2014, and it is being revised. In the meantime, please refer to this sourceforge project page.
