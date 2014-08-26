@@ -28,7 +28,7 @@ args= parser.parse_args()
 ambigs= re.compile('[WSMKRYBDHVNwsmkrybdhvn]+')
 
 #load sequences, retain if there are no ambigs in it
-clean= (r for r in SeqIO.parse(args.in_fasta, "fasta") if ambigs.search(r.seq.tostring()) == None)
+clean= (r for r in SeqIO.parse(args.in_fasta, "fasta") if ambigs.search(str(r.seq)) == None)
 
 #save reads
 SeqIO.write(clean, args.out_fasta, 'fasta')

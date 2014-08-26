@@ -22,7 +22,7 @@ import argparse
 
 def remove_gapped_cols(seq_records):
   #create alignment
-  length= len(seq_records[0].seq.tostring())
+  length= len(str(seq_records[0].seq))
   #using bitarrays.... generate translation tables
   trans_table= string.maketrans(string.uppercase + string.lowercase + '.-', ''.join(['0' for i in xrange(52)]) + '11')
   gap_bitarray= length*bitarray('1')
@@ -30,12 +30,12 @@ def remove_gapped_cols(seq_records):
   #translate gaps to '1', characters to '0'.. bitwise AND with
   #previous colums
   for record in seq_records:
-      gap_bitarray &= bitarray(record.seq.tostring().translate(trans_table))
+      gap_bitarray &= bitarray(str(record.seq).translate(trans_table))
 
   #list of non-gap columns, the ones we want to keep
   nongaps= gap_bitarray.search(zero)
   for rec in seq_records:
-    seq_s= rec.seq.tostring()
+    seq_s= str(rec.seq)
     new_s= ''.join([seq_s[i] for i in nongaps])
     yield SeqRecord(seq=Seq(new_s, generic_nucleotide), id=rec.id, name='', description='')  
     

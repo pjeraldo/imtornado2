@@ -23,7 +23,7 @@ def trim_reads_R1(l, reads, new_ids):
     trim= lambda s: s[:l]
     for r in reads:
         if len(r) > l:
-            yield SeqRecord(seq=Seq(trim(r.seq.tostring()),generic_nucleotide), id=new_ids[r.id], description="original_id={}".format(r.id))
+            yield SeqRecord(seq=Seq(trim(str(r.seq)),generic_nucleotide), id=new_ids[r.id], description="original_id={}".format(r.id))
         else:
             yield SeqRecord(seq=r.seq, id=new_ids[r.id], description="original_id={}".format(r.id))
 
@@ -32,7 +32,7 @@ def trim_reads_R2(l, reads, new_ids):
     for r in reads:
         rc_seq= r.seq.reverse_complement()
         if len(r) > l:
-            yield SeqRecord(seq=Seq(trim(rc_seq.tostring()),generic_nucleotide), id=new_ids[r.id], description="original_id={}".format(r.id))
+            yield SeqRecord(seq=Seq(trim(str(rc_seq)),generic_nucleotide), id=new_ids[r.id], description="original_id={}".format(r.id))
         else:
             yield SeqRecord(seq=rc_seq, id=new_ids[r.id], description="original_id={}".format(r.id))
 
