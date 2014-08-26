@@ -13,7 +13,24 @@ __email__ = "jeraldo.patricio@mayo.edu"
 __status__ = "Production"
 
 import argparse
-from biom.table import table_factory
+import sys
+import biom
+#check version of the BIOM API
+biom_version= biom.__version__
+table_from_API={}
+if biom_version[0] == '1':
+    biom_API= '1.0'
+elif biom_version[0] == '2':
+    biom_API= '2.1'
+else:
+	sys.stderr.write("Unsupported BIOM-format API: {}\n".format(biom_version))
+	sys.exit(1)
+if biom_API == '2.1':
+    from biom.table import Table
+    table_from_API[biom_API]=Table
+else:
+    from biom.table import table_factory
+    table_from_API[biom_API]=table_factory
 import numpy
 from itertools import izip
 
@@ -69,18 +86,14 @@ for otu,reads in otu_dict.iteritems():
         #add one to each count
         observations[otu_id,sample_id]+= 1
 #now that the observation matrix is filled, create the biom table
-otu_table= table_factory(observations, samples, otu_dict.keys(), metadata, observation_metadata= taxonomy_metadata)
+
+otu_table= table_from_API[biom_API](data=observations, sample_ids= samples, observation_ids= otu_dict.keys(), sample_metadata= metadata, observation_metadata= taxonomy_metadata)
 
 #Write the biom file
-with open(args.out_biom_file, "w") as outfile:
-    outfile.write(otu_table.getBiomFormatJsonString("IM-TORNADO-{}".format(__version__)) + '\n')
-
-
+with open(args.out_biom_file, "w") as outfile: 
+    if biom_API=='2.1':
+        outfile.write(otu_table.to_json("IM-TORNADO-{}".format(__version__)) + '\n')
+    else:
+        outfile.write(otu_table.getBiomFormatJsonString("IM-TORNADO-{}".format(__version__)) + '\n')
 
 #done
-
-    
-    
-        
-
-
