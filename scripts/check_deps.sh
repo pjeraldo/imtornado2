@@ -50,6 +50,6 @@ $TORNADO2/bin/tornado_check_python_deps.py
 
 #check for Trimmomatic's existence
 echo -e "Checking for Trimmomatic"
-[ -s $TRIMMOMATIC ] || die "This script requires Trimmomatic to run but it is not installed"
+[ -s $TRIMMOMATIC ] || die 1 "This script requires Trimmomatic to run but it is not installed"
 
 echo -e "Done with dependency checks."
