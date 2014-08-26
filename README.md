@@ -6,6 +6,13 @@ Documentation is being written and will be updated as it becomes ready.
 
 ## Changelog
 
+### Version 2.0.2
+
+* **Pipeline runs in Apple OSX now** (tested only in Mavericks). Pipeline is now POSIX-compliant-enough to properly run in OSX. Instructions to follow soon
+* Pipeline supports BIOM format APIs 1.0, 2.0 and 2.1, so it can run regardless of what version of biom-format is installed (as long as the API doesn't change again). The BIOM output is still JSON only
+* Minor fixes in the dependency check scripts
+* Other minor fixes
+
 ### Version 2.0.1
 
 * Fix hardcoded parameters
