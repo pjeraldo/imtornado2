@@ -112,10 +112,11 @@ tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R2.fasta ${PREFIX}_R2.c
 #flatten out the reads
 echo "Flatten read files..."
 #cat ${PREFIX}_R1.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_R1.common.flat.fasta
-cat ${PREFIX}_R1.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/'| tr -d '\n'| perl -pe 's/xXx/\n/g'| sed '/^$/d' > ${PREFIX}_R1.common.flat.fasta
+#cat ${PREFIX}_R1.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/'| tr -d '\n'| perl -pe 's/xXx/\n/g'| sed '/^$/d' > ${PREFIX}_R1.common.flat.fasta
+tornado_flatten_fasta.py -i ${PREFIX}_R1.common.fasta -o ${PREFIX}_R1.common.flat.fasta
 #cat ${PREFIX}_R2.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_R2.common.flat.fasta
-cat ${PREFIX}_R2.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/'| tr -d '\n'| perl -pe 's/xXx/\n/g'| sed '/^$/d' > ${PREFIX}_R2.common.flat.fasta
-
+#cat ${PREFIX}_R2.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/'| tr -d '\n'| perl -pe 's/xXx/\n/g'| sed '/^$/d' > ${PREFIX}_R2.common.flat.fasta
+tornado_flatten_fasta.py -i ${PREFIX}_R2.common.fasta -o ${PREFIX}_R2.common.flat.fasta
 #Strip out the R2 reads from their IDs
 #cat ${PREFIX}_R2.common.flat.fasta | sed -n '2~2p'| sed 's/^/\n/' > ${PREFIX}_R2.3prime.txt
 
@@ -136,7 +137,7 @@ mothur "#unique.seqs(fasta=${PREFIX}_R2.fasta)"
 mothur "#unique.seqs(fasta=${PREFIX}_paired.fasta)"
 
 #calculate overall taxonomy if consensus is set
-if [ $CONSENSUS_TAXONOMY = "1" ]
+if [[ $CONSENSUS_TAXONOMY == "1" ]]
 then
 #unique samples
 mothur "#unique.seqs(fasta=${PREFIX}.padded.fasta)"
@@ -295,9 +296,11 @@ tornado_read_picker.py ${PREFIX}.aligned.common.accnos ${PREFIX}_paired.R2.align
 
 #flatten reads
 #cat ${PREFIX}_paired.R1.aligned.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R1.aligned.flat.fasta
-cat ${PREFIX}_paired.R1.aligned.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/' | tr -d '\n' | perl -pe 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R1.aligned.flat.fasta 
+#cat ${PREFIX}_paired.R1.aligned.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/' | tr -d '\n' | perl -pe 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R1.aligned.flat.fasta
+tornado_flatten_fasta.py -i ${PREFIX}_paired.R1.aligned.common.fasta -o ${PREFIX}_paired.R1.aligned.flat.fasta
 #cat ${PREFIX}_paired.R2.aligned.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R2.aligned.flat.fasta
-cat ${PREFIX}_paired.R2.aligned.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/' | tr -d '\n' | perl -pe 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R2.aligned.flat.fasta
+#cat ${PREFIX}_paired.R2.aligned.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/' | tr -d '\n' | perl -pe 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R2.aligned.flat.fasta
+tornado_flatten_fasta.py -i ${PREFIX}_paired.R2.aligned.common.fasta -o ${PREFIX}_paired.R2.aligned.flat.fasta
 
 #and concatenate
 echo "Concatenate read pairs"
