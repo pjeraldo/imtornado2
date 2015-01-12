@@ -67,12 +67,27 @@ CLEAN=normal
 #or some other name. It needs to be in the PATH
 USEARCH7=usearch7
 
+#(OPTIONAL) If you have VSEARCH, enter the name of the VSEARCH binary or a 64-bit USEARCH.
+#Otherwise, leave empty.
+#If you use the 64-bit USEARCH, enter the same as above.
+#Using VSEARCH or the 64-bit version of USEARCH 7 can simplify and speed up
+#some steps when dealing with large number of reads, without running into the memory
+#limitations of 32-bit USEARCH.
+#USE VSEARCH_OPTS to enter any VSEARCH-specific options for the usearch_global step
+#e.g. VSEARCH_OPTS=--output_no_hits
+VSEARCH=
+VSEARCH_OPTS=
+
 #Name of the Fast Tree executable
 FASTTREE=FastTreeMP
 
 #PATH to Trimmomatic jar file
 TRIMMOMATIC=/path/to/trimmomatic-0.32.jar
 
+#Name of the GZip executable. If you have pigz (parallel gzip), enter it here.
+#For example: GZIP='pigz -p $NPROC'
+GZIP=gz
+
 #Advanced settings. Do not modify unless you know what you are doing.
-TORNADO2=/path/to/IM-TORNADO-2.0.2
+TORNADO2=/path/to/IM-TORNADO-2.0.3
 DATA=$TORNADO2/data

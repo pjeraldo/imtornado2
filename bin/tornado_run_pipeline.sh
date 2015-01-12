@@ -114,56 +114,60 @@ tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R1.fasta ${PREFIX}_R1.c
 tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R2.fasta ${PREFIX}_R2.common.fasta
 #flatten out the reads
 echo "Flatten read files..."
-#cat ${PREFIX}_R1.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_R1.common.flat.fasta
-#cat ${PREFIX}_R1.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/'| tr -d '\n'| perl -pe 's/xXx/\n/g'| sed '/^$/d' > ${PREFIX}_R1.common.flat.fasta
 tornado_flatten_fasta.py -i ${PREFIX}_R1.common.fasta -o ${PREFIX}_R1.common.flat.fasta
-#cat ${PREFIX}_R2.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_R2.common.flat.fasta
-#cat ${PREFIX}_R2.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/'| tr -d '\n'| perl -pe 's/xXx/\n/g'| sed '/^$/d' > ${PREFIX}_R2.common.flat.fasta
 tornado_flatten_fasta.py -i ${PREFIX}_R2.common.fasta -o ${PREFIX}_R2.common.flat.fasta
-#Strip out the R2 reads from their IDs
-#cat ${PREFIX}_R2.common.flat.fasta | sed -n '2~2p'| sed 's/^/\n/' > ${PREFIX}_R2.3prime.txt
 
 #and concatenate
 echo "Concatenate read pairs"
 #concatenate padded
-#paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | sed '1~2 s/N>.*//' > ${PREFIX}.padded.fasta
-paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | awk 'NR%2 ==0; NR%2 ==1 {sub(/N.*/,""); print}' > ${PREFIX}.padded.fasta
-#now remove the pad to make the paired read
-#sed '2~2 s/N//' ${PREFIX}.padded.fasta > ${PREFIX}_paired.fasta
-awk 'NR%2 == 1; NR%2 == 0 {sub(/N/,""); print}' ${PREFIX}.padded.fasta > ${PREFIX}_paired.fasta
 
-#OTU R1 and R2, separately
-#dereplicate
-#use mothur for this for now
-mothur "#unique.seqs(fasta=${PREFIX}_R1.fasta)"
-mothur "#unique.seqs(fasta=${PREFIX}_R2.fasta)"
-mothur "#unique.seqs(fasta=${PREFIX}_paired.fasta)"
+paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | awk 'NR%2 ==0; NR%2 ==1 {sub(/N.*/,""); print}' > ${PREFIX}.padded.fasta
+awk 'NR%2 == 1; NR%2 == 0 {sub(/N/,""); print}' ${PREFIX}.padded.fasta > ${PREFIX}_paired.fasta
 
 #calculate overall taxonomy if consensus is set
 if [[ $CONSENSUS_TAXONOMY == "1" ]]
-then
-#unique samples
-mothur "#unique.seqs(fasta=${PREFIX}.padded.fasta)"
-mothur "#classify.seqs(fasta=${PREFIX}_R1.unique.fasta-${PREFIX}_R2.unique.fasta-${PREFIX}.padded.unique.fasta, name=${PREFIX}_R1.names-${PREFIX}_R2.names-${PREFIX}.padded.names, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC})"
+  then
+  #unique samples
+  mothur "#unique.seqs(fasta=${PREFIX}.padded.fasta)"
+  mothur "#classify.seqs(fasta=${PREFIX}_R1.unique.fasta-${PREFIX}_R2.unique.fasta-${PREFIX}.padded.unique.fasta, name=${PREFIX}_R1.names-${PREFIX}_R2.names-${PREFIX}.padded.names, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC})"
 fi
 
-#get the "counts" .. returns PREFIX_R?.seq.count
-mothur "#count.seqs(name=${PREFIX}_R1.names)"
-mothur "#count.seqs(name=${PREFIX}_R2.names)"
-mothur "#count.seqs(name=${PREFIX}_paired.names)"
+#OTU R1 and R2, separately
+#dereplicate
 
-#annotate the uniques with the sizes
-#and remove reads shorter than the specified trims
-echo "Annotating unique sizes..."
-echo "R1..."
+#is VSEARCH is set
+if [[ -n $VSEARCH ]]
+then
 
-tornado_annotate_read_sizes.py $R1_TRIM ${PREFIX}_R1.unique.fasta ${PREFIX}_R1.count_table ${PREFIX}_R1.derep.fasta
-echo "R2..."
+  $VSEARCH -derep_fulllength ${PREFIX}_R1.fasta -output ${PREFIX}_R1.derep.fasta -sizeout
+  $VSEARCH -derep_fulllength ${PREFIX}_R2.fasta -output ${PREFIX}_R2.derep.fasta -sizeout
+  $VSEARCH -derep_fulllength ${PREFIX}_paired.fasta -output ${PREFIX}_paired.derep.fasta -sizeout
 
-tornado_annotate_read_sizes.py $R2_TRIM ${PREFIX}_R2.unique.fasta ${PREFIX}_R2.count_table ${PREFIX}_R2.derep.fasta
-echo "Paired..."
+else
+  #use mothur for this for now
+  mothur "#unique.seqs(fasta=${PREFIX}_R1.fasta)"
+  mothur "#unique.seqs(fasta=${PREFIX}_R2.fasta)"
+  mothur "#unique.seqs(fasta=${PREFIX}_paired.fasta)"
 
-tornado_annotate_read_sizes.py $[R1_TRIM + R2_TRIM] ${PREFIX}_paired.unique.fasta ${PREFIX}_paired.count_table ${PREFIX}_paired.derep.fasta
+  #get the "counts" .. returns PREFIX_R?.seq.count
+  mothur "#count.seqs(name=${PREFIX}_R1.names)"
+  mothur "#count.seqs(name=${PREFIX}_R2.names)"
+  mothur "#count.seqs(name=${PREFIX}_paired.names)"
+
+  #annotate the uniques with the sizes
+  #and remove reads shorter than the specified trims
+  echo "Annotating unique sizes..."
+  echo "R1..."
+
+  tornado_annotate_read_sizes.py $R1_TRIM ${PREFIX}_R1.unique.fasta ${PREFIX}_R1.count_table ${PREFIX}_R1.derep.fasta
+  echo "R2..."
+
+  tornado_annotate_read_sizes.py $R2_TRIM ${PREFIX}_R2.unique.fasta ${PREFIX}_R2.count_table ${PREFIX}_R2.derep.fasta
+  echo "Paired..."
+
+  tornado_annotate_read_sizes.py $[R1_TRIM + R2_TRIM] ${PREFIX}_paired.unique.fasta ${PREFIX}_paired.count_table ${PREFIX}_paired.derep.fasta
+
+fi
 
 #remove singletons
 $USEARCH7 -sortbysize ${PREFIX}_R1.derep.fasta -output ${PREFIX}_R1.derep2.fasta -minsize 2
@@ -322,42 +326,51 @@ isitthere ../$RESULTS/${PREFIX}_R1.tree
 isitthere ../$RESULTS/${PREFIX}_R2.tree
 isitthere ../$RESULTS/${PREFIX}_paired.tree
 
-#now map the reads into the OTU buckets
-echo "Map OTUs R1"
-#split the fasta into 1 GB chunks, 
-gt splitfasta -targetsize 1000 ${PREFIX}_R1.fasta
-#how many we have?
-COUNT=`ls ${PREFIX}_R1.fasta.*|wc -l`
-for i in $(seq $COUNT)
-do
-$USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_R1.fasta.${i} -db ${PREFIX}_R1.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_R1.uc.${i}
-done
-#and merge the outputs
-cat ${PREFIX}_R1.uc.* > ${PREFIX}_R1.uc
-echo "Map OTUs R2"
-#split the fasta into 1 GB chunks, 
-gt splitfasta -targetsize 1000 ${PREFIX}_R2.fasta
-#how many we have?
-COUNT=`ls ${PREFIX}_R2.fasta.*|wc -l`
-for i in $(seq $COUNT)
-do
-$USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_R2.fasta.${i} -db ${PREFIX}_R2.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_R2.uc.${i}
-done
-#and merge the outputs
-cat ${PREFIX}_R2.uc.* > ${PREFIX}_R2.uc
-echo "Map OTUs R1+R2"
-#split the fasta into 1 GB chunks, 
-gt splitfasta -targetsize 1000 ${PREFIX}_paired.fasta
-#how many we have?
-COUNT=`ls ${PREFIX}_paired.fasta.*|wc -l`
+if [[ -n $VSEARCH ]]
+then
+  echo "Map OTUs R1"
+  $VSEARCH --threads $NPROC --usearch_global ${PREFIX}_R1.fasta --db ${PREFIX}_R1.otus.final.fasta --strand plus --id 0.97 --uc ${PREFIX}_R1.uc $VSEARCH_OPTS
+  echo "Map OTUs R2"
+  $VSEARCH --threads $NPROC --usearch_global ${PREFIX}_R2.fasta --db ${PREFIX}_R2.otus.final.fasta --strand plus --id 0.97 --uc ${PREFIX}_R2.uc $VSEARCH_OPTS
+  echo "Map OTUs R1+R2"
+  $VSEARCH --threads $NPROC --usearch_global ${PREFIX}_paired.fasta --db ${PREFIX}_paired.otus.final.fasta --strand plus --id 0.97 --uc ${PREFIX}_paired.uc $VSEARCH_OPTS
+else
+  #now map the reads into the OTU buckets
+  echo "Map OTUs R1"
+  #split the fasta into 1 GB chunks, 
+  gt splitfasta -targetsize 1000 ${PREFIX}_R1.fasta
+  #how many we have?
+  COUNT=`ls ${PREFIX}_R1.fasta.*|wc -l`
+  for i in $(seq $COUNT)
+  do
+  $USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_R1.fasta.${i} -db ${PREFIX}_R1.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_R1.uc.${i}
+  done
+  #and merge the outputs
+  cat ${PREFIX}_R1.uc.* > ${PREFIX}_R1.uc
+  echo "Map OTUs R2"
+  #split the fasta into 1 GB chunks, 
+  gt splitfasta -targetsize 1000 ${PREFIX}_R2.fasta
+  #how many we have?
+  COUNT=`ls ${PREFIX}_R2.fasta.*|wc -l`
+  for i in $(seq $COUNT)
+  do
+  $USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_R2.fasta.${i} -db ${PREFIX}_R2.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_R2.uc.${i}
+  done
+  #and merge the outputs
+  cat ${PREFIX}_R2.uc.* > ${PREFIX}_R2.uc
+  echo "Map OTUs R1+R2"
+  #split the fasta into 1 GB chunks, 
+  gt splitfasta -targetsize 1000 ${PREFIX}_paired.fasta
+  #how many we have?
+  COUNT=`ls ${PREFIX}_paired.fasta.*|wc -l`
+  for i in $(seq $COUNT)
+  do
+  $USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_paired.fasta.${i} -db ${PREFIX}_paired.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_paired.uc.${i}
+  done
+  #and merge the outputs
+  cat ${PREFIX}_paired.uc.* > ${PREFIX}_paired.uc
+fi
 mv ${PREFIX}_paired.tax.${TAXONOMY}.wang.taxonomy ${PREFIX}_paired.otus2.${TAXONOMY}.wang.taxonomy
-for i in $(seq $COUNT)
-do
-$USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_paired.fasta.${i} -db ${PREFIX}_paired.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_paired.uc.${i}
-done
-#and merge the outputs
-cat ${PREFIX}_paired.uc.* > ${PREFIX}_paired.uc
-
 #parse the OTU clusters
 echo "Parsing OTU clusters..."
 
@@ -453,6 +466,14 @@ tornado_clean_taxonomy.py ../$RESULTS/${PREFIX}_paired.otus.final.fasta ../$RESU
 mv ../$RESULTS/tmp_paired.taxonomy ../$RESULTS/${PREFIX}_paired.probs.taxonomy
 mv ../$RESULTS/tmp_R1.taxonomy ../$RESULTS/${PREFIX}_R1.probs.taxonomy
 mv ../$RESULTS/tmp_R2.taxonomy ../$RESULTS/${PREFIX}_R2.probs.taxonomy
+
+#Compress the large fasta files
+$GZIP ${PREFIX}_R1.fasta
+$GZIP ${PREFIX}_R2.fasta
+$GZIP ${PREFIX}_paired.fasta
+
+mv *.gz ../$RESULTS/
+
 echo "Cleaning up..."
 if [ $CLEAN = 'all' ]
 then

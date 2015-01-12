@@ -90,11 +90,6 @@ done
 cat *M.trim.fasta > ${PREFIX}_M.fasta
 isitthere ${PREFIX}_M.fasta
 
-#OTU R1 and R2, separately
-#dereplicate
-#use mothur for this for now
-mothur "#unique.seqs(fasta=${PREFIX}_M.fasta)"
-
 #calculate overall taxonomy if consensus is set
 if [ $CONSENSUS_TAXONOMY = "1" ]
 then
@@ -102,14 +97,24 @@ then
 mothur "#classify.seqs(fasta=${PREFIX}_M.unique.fasta name=${PREFIX}_M.names, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC})"
 fi
 
-#get the "counts" .. returns PREFIX_R?.seq.count
-mothur "#count.seqs(name=${PREFIX}_M.names)"
+if [[ -n $VSEARCH ]]
+then
+  $VSEARCH -derep_fulllength ${PREFIX}_M.fasta -output ${PREFIX}_M.derep.fasta -sizeout
+else
+  #OTU R1 and R2, separately
+  #dereplicate
+  #use mothur for this for now
+  mothur "#unique.seqs(fasta=${PREFIX}_M.fasta)"
 
-#annotate the uniques with the sizes
-#and remove reads shorter than the specified trims
-echo "Annotating unique sizes..."
-#changing minimum length to 1 to not exclude any reads, for now... can leave up to user
-tornado_annotate_read_sizes.py 1 ${PREFIX}_M.unique.fasta ${PREFIX}_M.count_table ${PREFIX}_M.derep.fasta
+  #get the "counts" .. returns PREFIX_R?.seq.count
+  mothur "#count.seqs(name=${PREFIX}_M.names)"
+
+  #annotate the uniques with the sizes
+  #and remove reads shorter than the specified trims
+  echo "Annotating unique sizes..."
+  #changing minimum length to 1 to not exclude any reads, for now... can leave up to user
+  tornado_annotate_read_sizes.py 1 ${PREFIX}_M.unique.fasta ${PREFIX}_M.count_table ${PREFIX}_M.derep.fasta
+fi
 
 #remove singletons
 $USEARCH7 -sortbysize ${PREFIX}_M.derep.fasta -output ${PREFIX}_M.derep2.fasta -minsize 2
@@ -153,7 +158,6 @@ tornado_stk2fasta.py ${PREFIX}_M.otus3.aligned.stk ${PREFIX}_M.otus3.aligned.fas
 echo "Filter bad reads"
 #look for the badly aligned reads
 #for the merging pipeline, this can be improved by looking at alignment start and ends
-#sed '/#/d' ${PREFIX}_M.scores | awk '{if ($7 < 0) print $2}' > bad_align_M.accnos
 tornado_overlap_score_filter.py ${PREFIX}_M.scores bad_align_M.accnos
 
 #remove them from the OTU file 
@@ -186,18 +190,23 @@ cp *.tree ../$RESULTS
 isitthere ../$RESULTS/${PREFIX}_M.tree
 
 #now map the reads into the OTU buckets
-echo "Map OTUs R1"
-#split the fasta into 1 GB chunks, 
-gt splitfasta -targetsize 1000 ${PREFIX}_M.fasta
-#how many we have?
-COUNT=`ls ${PREFIX}_M.fasta.*|wc -l`
-for i in $(seq $COUNT)
-do
-$USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_M.fasta.${i} -db ${PREFIX}_M.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_M.uc.${i}
-done
-#and merge the outputs
-cat ${PREFIX}_M.uc.* > ${PREFIX}_M.uc
+echo "Map OTUs"
 
+if [[ -n $VSEARCH ]]
+then
+  $USEARCH7 --threads $NPROC --usearch_global ${PREFIX}_M.fasta --db ${PREFIX}_M.otus.final.fasta --strand plus --id 0.97 --uc ${PREFIX}_M.uc $VSEARCH_OPTS
+else
+  #split the fasta into 1 GB chunks, 
+  gt splitfasta -targetsize 1000 ${PREFIX}_M.fasta
+  #how many we have?
+  COUNT=`ls ${PREFIX}_M.fasta.*|wc -l`
+  for i in $(seq $COUNT)
+  do
+  $USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_M.fasta.${i} -db ${PREFIX}_M.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_M.uc.${i}
+  done
+  #and merge the outputs
+  cat ${PREFIX}_M.uc.* > ${PREFIX}_M.uc
+fi
 #parse the OTU clusters
 echo "Parsing OTU clusters..."
 
@@ -244,6 +253,13 @@ tornado_make_biom_table.py ${PREFIX}_M.otus.txt ../$MAPPING ${PREFIX}_M.otus2.${
 
 #copy the failures to the results
 cp ${PREFIX}*failures.txt ../$RESULTS
+#copy OTUs to results
+cp ${PREFIX}*otus.txt ../$RESULTS
+
+#compress clean reads
+$GZIP ${PREFIX}_M.fasta
+#and move them to the results area
+mv ${PREFIX}_M.fasta ../$RESULTS
 
 echo "Copy results"
 #and copy the bioms into the results file
