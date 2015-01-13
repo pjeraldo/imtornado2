@@ -302,16 +302,12 @@ tornado_read_picker.py ${PREFIX}.aligned.common.accnos ${PREFIX}_paired.R1.align
 tornado_read_picker.py ${PREFIX}.aligned.common.accnos ${PREFIX}_paired.R2.aligned.fasta ${PREFIX}_paired.R2.aligned.common.fasta
 
 #flatten reads
-#cat ${PREFIX}_paired.R1.aligned.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R1.aligned.flat.fasta
-#cat ${PREFIX}_paired.R1.aligned.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/' | tr -d '\n' | perl -pe 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R1.aligned.flat.fasta
 tornado_flatten_fasta.py -i ${PREFIX}_paired.R1.aligned.common.fasta -o ${PREFIX}_paired.R1.aligned.flat.fasta
-#cat ${PREFIX}_paired.R2.aligned.common.fasta | sed '/^>/s/$/xXx/ ; /^>/s/^/xXx/'| tr -d '\n'| sed 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R2.aligned.flat.fasta
-#cat ${PREFIX}_paired.R2.aligned.common.fasta | perl -pe 's/$/xXx/ if /^>/; s/^/xXx/ if /^>/' | tr -d '\n' | perl -pe 's/xXx/\n/g' | sed '/^$/d' > ${PREFIX}_paired.R2.aligned.flat.fasta
 tornado_flatten_fasta.py -i ${PREFIX}_paired.R2.aligned.common.fasta -o ${PREFIX}_paired.R2.aligned.flat.fasta
 
 #and concatenate
 echo "Concatenate read pairs"
-#paste -d 'N' ${PREFIX}_paired.R1.aligned.flat.fasta ${PREFIX}_paired.R2.aligned.flat.fasta| sed '1~2 s/N>.*//'| sed '2~2 s/N//' > ${PREFIX}_paired.aligned.fasta
+
 paste -d 'N' ${PREFIX}_paired.R1.aligned.flat.fasta ${PREFIX}_paired.R2.aligned.flat.fasta| awk 'NR%2 == 1 {sub(/N>.*/,""); print}; NR%2 == 0 {sub(/N/,""); print}' > ${PREFIX}_paired.aligned.fasta
 echo "Make trees"
 #now we can tree
@@ -481,13 +477,13 @@ cd ..
 rm -rf $WORKSPACE
 elif [ $CLEAN = 'normal' ]
 then
-mv ${PREFIX}_R1.fasta ${PREFIX}_R1.fasta.save
-mv ${PREFIX}_R2.fasta ${PREFIX}_R2.fasta.save
-mv ${PREFIX}_paired.fasta ${PREFIX}_paired.fasta.save
+#mv ${PREFIX}_R1.fasta ${PREFIX}_R1.fasta.save
+#mv ${PREFIX}_R2.fasta ${PREFIX}_R2.fasta.save
+#mv ${PREFIX}_paired.fasta ${PREFIX}_paired.fasta.save
 rm -f *.fasta *.fasta.[0-9]* *.uc *.uc.* *.cfastq *accnos *biom *groups *logfile *map *scores *stk *summary *taxonomy *tree *txt *names *count_table
-mv ${PREFIX}_R1.fasta.save ${PREFIX}_R1.fasta
-mv ${PREFIX}_R2.fasta.save ${PREFIX}_R2.fasta
-mv ${PREFIX}_paired.fasta.save ${PREFIX}_paired.fasta
+#mv ${PREFIX}_R1.fasta.save ${PREFIX}_R1.fasta
+#mv ${PREFIX}_R2.fasta.save ${PREFIX}_R2.fasta
+#mv ${PREFIX}_paired.fasta.save ${PREFIX}_paired.fasta
 elif [ $CLEAN = 'no' ]
 then
 echo "No cleanup performed."

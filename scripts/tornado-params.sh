@@ -85,7 +85,7 @@ FASTTREE=FastTreeMP
 TRIMMOMATIC=/path/to/trimmomatic-0.32.jar
 
 #Name of the GZip executable. If you have pigz (parallel gzip), enter it here.
-#For example: GZIP='pigz -p $NPROC'
+#For example: GZIP="pigz -p $NPROC"
 GZIP=gz
 
 #Advanced settings. Do not modify unless you know what you are doing.

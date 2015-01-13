@@ -194,7 +194,7 @@ echo "Map OTUs"
 
 if [[ -n $VSEARCH ]]
 then
-  $USEARCH7 --threads $NPROC --usearch_global ${PREFIX}_M.fasta --db ${PREFIX}_M.otus.final.fasta --strand plus --id 0.97 --uc ${PREFIX}_M.uc $VSEARCH_OPTS
+  $VSEARCH --threads $NPROC --usearch_global ${PREFIX}_M.fasta --db ${PREFIX}_M.otus.final.fasta --strand plus --id 0.97 --uc ${PREFIX}_M.uc $VSEARCH_OPTS
 else
   #split the fasta into 1 GB chunks, 
   gt splitfasta -targetsize 1000 ${PREFIX}_M.fasta
