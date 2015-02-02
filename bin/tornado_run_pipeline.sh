@@ -121,7 +121,7 @@ tornado_flatten_fasta.py -i ${PREFIX}_R2.common.fasta -o ${PREFIX}_R2.common.fla
 echo "Concatenate read pairs"
 #concatenate padded
 
-paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | awk 'NR%2 ==0; NR%2 ==1 {sub(/N.*/,""); print}' > ${PREFIX}.padded.fasta
+paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | awk 'NR%2 ==0; NR%2 ==1 {sub(/N>.*/,""); print}' > ${PREFIX}.padded.fasta
 awk 'NR%2 == 1; NR%2 == 0 {sub(/N/,""); print}' ${PREFIX}.padded.fasta > ${PREFIX}_paired.fasta
 
 #calculate overall taxonomy if consensus is set
