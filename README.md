@@ -1,14 +1,20 @@
 # IM-TORNADO: A pipeline for 16S reads from paired-end libraries
 
-This is the documentation for the IM-TORNADO pipeline, currently at version 2.0.3
-
-Documentation will be available in [Read the Docs](http://readthedocs.org) soon.
+This is the documentation for the IM-TORNADO pipeline, currently at version 2.0.3.2
 
 ## Changelog
 
+### Miscellaneous
+
+Moving releases and development to github, at [https://github.com/pjeraldo/imtornado2](https://github.com/pjeraldo/imtornado2). Further updates will be relased in this github repository.
+
+### Version 2.0.3.2
+
+* Bugfix - Fixed bug mangling some sample names.
+
 ### Version 2.0.3.1
 
-* Bigfix - Minor problem when cleaning after the pipeline corrected now.
+* Bugfix - Minor problem when cleaning after the pipeline corrected now.
 * Bugfix - Correct README now included in the tarball
 
 ### Version 2.0.3
