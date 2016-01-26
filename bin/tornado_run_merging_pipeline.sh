@@ -160,8 +160,11 @@ echo "Filter bad reads"
 #for the merging pipeline, this can be improved by looking at alignment start and ends
 tornado_overlap_score_filter.py ${PREFIX}_M.scores bad_align_M.accnos
 
+#convert all lowercase bases to uppercase
+awk '{print (substr($0,0,1) == ">")? $0 : toupper($0)}' ${PREFIX}_M.otus3.fasta > ${PREFIX}_M.otus4.fasta
+
 #remove them from the OTU file 
-tornado_read_remover.py bad_align_M.accnos ${PREFIX}_M.otus3.fasta ${PREFIX}_M.otus.final.fasta
+tornado_read_remover.py bad_align_M.accnos ${PREFIX}_M.otus4.fasta ${PREFIX}_M.otus.final.fasta
 
 #copy the final OTUs into the results file
 #because they are actually a results

@@ -256,10 +256,15 @@ sed '/#/d' ${PREFIX}_paired.R1.scores | awk '{if ($7 < 0) print $2}' > bad_align
 sed '/#/d' ${PREFIX}_paired.R2.scores | awk '{if ($7 < 0) print $2}' > bad_align_paired.R2.accnos
 cat bad_align_paired.R1.accnos bad_align_paired.R2.accnos |sort -u > bad_align_paired.accnos
 
+#convert all lowercase bases to uppercase
+awk '{print (substr($0,0,1) == ">")? $0 : toupper($0)}' ${PREFIX}_R1.otus3.fasta > ${PREFIX}_R1.otus4.fasta
+awk '{print (substr($0,0,1) == ">")? $0 : toupper($0)}' ${PREFIX}_R2.otus3.fasta > ${PREFIX}_R2.otus4.fasta
+awk '{print (substr($0,0,1) == ">")? $0 : toupper($0)}' ${PREFIX}_paired.otus3.fasta > ${PREFIX}_paired.otus4.fasta
+
 #remove them from the OTU file 
-tornado_read_remover.py bad_align_R1.accnos ${PREFIX}_R1.otus3.fasta ${PREFIX}_R1.otus.final.fasta
-tornado_read_remover.py bad_align_R2.accnos ${PREFIX}_R2.otus3.fasta ${PREFIX}_R2.otus.final.fasta
-tornado_read_remover.py bad_align_paired.accnos ${PREFIX}_paired.otus3.fasta ${PREFIX}_paired.otus.final.fasta
+tornado_read_remover.py bad_align_R1.accnos ${PREFIX}_R1.otus4.fasta ${PREFIX}_R1.otus.final.fasta
+tornado_read_remover.py bad_align_R2.accnos ${PREFIX}_R2.otus4.fasta ${PREFIX}_R2.otus.final.fasta
+tornado_read_remover.py bad_align_paired.accnos ${PREFIX}_paired.otus4.fasta ${PREFIX}_paired.otus.final.fasta
 
 #copy the final OTUs into the results file
 #because they are actually a results
