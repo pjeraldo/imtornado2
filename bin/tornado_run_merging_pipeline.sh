@@ -243,11 +243,6 @@ cp ${PREFIX}_M.cons.probs.taxonomy ../$RESULTS/${PREFIX}_M.probs.consensus.taxon
 
 fi
 
-#finally, make the biom tables
-#Clean up taxonomy
-sed 's/unclassified;//g' ${PREFIX}_M.otus2.${TAXONOMY}.wang.taxonomy > tmp_M.taxonomy
-mv tmp_M.taxonomy ${PREFIX}_M.otus2.${TAXONOMY}.wang.taxonomy
-
 echo "Making OTU tables..."
 tornado_make_biom_table.py ${PREFIX}_M.otus.txt ../$MAPPING ${PREFIX}_M.otus2.${TAXONOMY}.wang.taxonomy ${PREFIX}_M.biom
 

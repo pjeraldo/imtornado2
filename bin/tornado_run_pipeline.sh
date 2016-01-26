@@ -430,15 +430,6 @@ cp ${PREFIX}_paired.cons.probs.taxonomy ../$RESULTS/${PREFIX}_paired.probs.taxon
 
 fi
 
-#finally, make the biom tables
-#Clean up taxonomy
-sed 's/unclassified;//g' ${PREFIX}_R1.otus2.${TAXONOMY}.wang.taxonomy > tmp_R1.taxonomy
-sed 's/unclassified;//g' ${PREFIX}_R2.otus2.${TAXONOMY}.wang.taxonomy > tmp_R2.taxonomy
-sed 's/unclassified;//g' ${PREFIX}_paired.otus2.${TAXONOMY}.wang.taxonomy > tmp_paired.taxonomy
-mv tmp_R1.taxonomy ${PREFIX}_R1.otus2.${TAXONOMY}.wang.taxonomy
-mv tmp_R2.taxonomy ${PREFIX}_R2.otus2.${TAXONOMY}.wang.taxonomy
-mv tmp_paired.taxonomy ${PREFIX}_paired.otus2.${TAXONOMY}.wang.taxonomy
-
 echo "Making OTU tables..."
 tornado_make_biom_table.py ${PREFIX}_R1.otus.txt ../$MAPPING ${PREFIX}_R1.otus2.${TAXONOMY}.wang.taxonomy ${PREFIX}_R1.biom
 tornado_make_biom_table.py ${PREFIX}_R2.otus.txt ../$MAPPING ${PREFIX}_R2.otus2.${TAXONOMY}.wang.taxonomy ${PREFIX}_R2.biom
