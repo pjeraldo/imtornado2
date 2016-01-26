@@ -106,12 +106,22 @@ isitthere ${PREFIX}_R1.fasta
 isitthere ${PREFIX}_R2.fasta
 isitthere ${PREFIX}.common.accnos
 
+#TODO For OTUing I need to keep only the reads in _R1.fasta and
+#_R2.fasta that have the exact length required
+#by $R1_TRIM and $R2_TRIM.
+#This way, only the very good reads are considered for
+#defining the OTU centers.
+#Otherwise, all this trimming is for nothing.
+#I will have to python it
+tornado_keep_reads_of_length.py $R1_TRIM ${PREFIX}_R1.fasta ${PREFIX}_R1.keep.fasta
+tornado_keep_reads_of_length.py $R2_TRIM ${PREFIX}_R2.fasta ${PREFIX}_R2.keep.fasta
+
 #Concatenate paired reads. This is only used for R1+R2 OTUing.
 #First, pick out the common ids
 echo "Pick common ids..."
 
-tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R1.fasta ${PREFIX}_R1.common.fasta
-tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R2.fasta ${PREFIX}_R2.common.fasta
+tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R1.keep.fasta ${PREFIX}_R1.common.fasta
+tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R2.keep.fasta ${PREFIX}_R2.common.fasta
 #flatten out the reads
 echo "Flatten read files..."
 tornado_flatten_fasta.py -i ${PREFIX}_R1.common.fasta -o ${PREFIX}_R1.common.flat.fasta
@@ -139,14 +149,14 @@ fi
 if [[ -n $VSEARCH ]]
 then
 
-  $VSEARCH -derep_fulllength ${PREFIX}_R1.fasta -output ${PREFIX}_R1.derep.fasta -sizeout
-  $VSEARCH -derep_fulllength ${PREFIX}_R2.fasta -output ${PREFIX}_R2.derep.fasta -sizeout
+  $VSEARCH -derep_fulllength ${PREFIX}_R1.keep.fasta -output ${PREFIX}_R1.derep.fasta -sizeout
+  $VSEARCH -derep_fulllength ${PREFIX}_R2.keep.fasta -output ${PREFIX}_R2.derep.fasta -sizeout
   $VSEARCH -derep_fulllength ${PREFIX}_paired.fasta -output ${PREFIX}_paired.derep.fasta -sizeout
 
 else
   #use mothur for this for now
-  mothur "#unique.seqs(fasta=${PREFIX}_R1.fasta)"
-  mothur "#unique.seqs(fasta=${PREFIX}_R2.fasta)"
+  mothur "#unique.seqs(fasta=${PREFIX}_R1.keep.fasta)"
+  mothur "#unique.seqs(fasta=${PREFIX}_R2.keep.fasta)"
   mothur "#unique.seqs(fasta=${PREFIX}_paired.fasta)"
 
   #get the "counts" .. returns PREFIX_R?.seq.count
