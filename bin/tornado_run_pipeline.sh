@@ -41,9 +41,9 @@ isitthere $MAPPING
 cut -f 1 $MAPPING | sed '/^#/d' > $WORKSPACE/ids.txt
 #SANITY CHECKS
 #count the number of samples
-NSAMPLES=`cat $WORKSPACE/ids.txt| wc -l`
-#count the number of fastq files in the directory. Assume paired end. COunt only R1.
-NREAD1=`ls *R1*fastq|wc -l`
+NSAMPLES=$(cat $WORKSPACE/ids.txt| wc -l)
+#count the number of fastq files in the directory. Assume paired end. Count only R1.
+NREAD1=$(ls *${SPACER}*R1*fastq|wc -l)
 #are they equal?
 [ $NSAMPLES == $NREAD1 ] || die 1 "Number of samples in mapping does not match number of fastq files."
 
@@ -62,27 +62,27 @@ done
 #Filter with Trimmomatic
 #The TrimmomaticPE command
 
-for name in `cat $WORKSPACE/ids.txt`
+for name in $(cat $WORKSPACE/ids.txt)
 do
-java -jar $TRIMMOMATIC SE -threads 4 -phred33 ${name}${SPACER}*R1*fastq $WORKSPACE/${name}_R1.cfastq LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:$MINIMUM_LENGTH
-java -jar $TRIMMOMATIC SE -threads 4 -phred33 ${name}${SPACER}*R2*fastq $WORKSPACE/${name}_R2.cfastq LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:$MINIMUM_LENGTH
+java -jar $TRIMMOMATIC SE -threads 4 -phred33 ${name}${SPACER}*R1*fastq $WORKSPACE/${name}_R1.clean.fastq LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:$MINIMUM_LENGTH
+java -jar $TRIMMOMATIC SE -threads 4 -phred33 ${name}${SPACER}*R2*fastq $WORKSPACE/${name}_R2.clean.fastq LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:$MINIMUM_LENGTH
 done
 
 #We won't need to be somewhere else until the very end
 cd $WORKSPACE
 #Convert FASTQ to FASTA
 echo "Converting FASTQ to FASTA"
-for name in `cat ids.txt`
+for name in $(cat ids.txt)
 do
-tornado_fastq2fasta.py ${name}_R1.cfastq ${name}_R1.fasta
-tornado_fastq2fasta.py ${name}_R2.cfastq ${name}_R2.fasta
+tornado_fastq2fasta.py ${name}_R1.clean.fastq ${name}_R1.fasta
+tornado_fastq2fasta.py ${name}_R2.clean.fastq ${name}_R2.fasta
 done
 
 #Quality filtering (according to EMP protocol). Q3 trimming, 75% of length as cutoff, no ambigs, nothing on homopolymers
 echo "Remove ambigs..."
 #no check for polys... let OTUing tacke care of this
 #there has to be a faster way to do this.
-for name in `cat ids.txt`
+for name in $(cat ids.txt)
 do
 tornado_remove_ambigs.sh ${name}_R1.fasta ${name}_R1.trim.fasta
 tornado_remove_ambigs.sh ${name}_R2.fasta ${name}_R2.trim.fasta
@@ -341,7 +341,7 @@ else
   #split the fasta into 1 GB chunks, 
   gt splitfasta -targetsize 1000 ${PREFIX}_R1.fasta
   #how many we have?
-  COUNT=`ls ${PREFIX}_R1.fasta.*|wc -l`
+  COUNT=$(ls ${PREFIX}_R1.fasta.*|wc -l)
   for i in $(seq $COUNT)
   do
   $USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_R1.fasta.${i} -db ${PREFIX}_R1.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_R1.uc.${i}
@@ -352,7 +352,7 @@ else
   #split the fasta into 1 GB chunks, 
   gt splitfasta -targetsize 1000 ${PREFIX}_R2.fasta
   #how many we have?
-  COUNT=`ls ${PREFIX}_R2.fasta.*|wc -l`
+  COUNT=$(ls ${PREFIX}_R2.fasta.*|wc -l)
   for i in $(seq $COUNT)
   do
   $USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_R2.fasta.${i} -db ${PREFIX}_R2.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_R2.uc.${i}
@@ -363,7 +363,7 @@ else
   #split the fasta into 1 GB chunks, 
   gt splitfasta -targetsize 1000 ${PREFIX}_paired.fasta
   #how many we have?
-  COUNT=`ls ${PREFIX}_paired.fasta.*|wc -l`
+  COUNT=$(ls ${PREFIX}_paired.fasta.*|wc -l)
   for i in $(seq $COUNT)
   do
   $USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_paired.fasta.${i} -db ${PREFIX}_paired.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_paired.uc.${i}
@@ -469,19 +469,13 @@ mv *.gz ../$RESULTS/
 echo "Cleaning up..."
 if [ $CLEAN = 'all' ]
 then
-cd ..
-rm -rf $WORKSPACE
+  cd ..
+  rm -rf $WORKSPACE
 elif [ $CLEAN = 'normal' ]
 then
-#mv ${PREFIX}_R1.fasta ${PREFIX}_R1.fasta.save
-#mv ${PREFIX}_R2.fasta ${PREFIX}_R2.fasta.save
-#mv ${PREFIX}_paired.fasta ${PREFIX}_paired.fasta.save
-rm -f *.fasta *.fasta.[0-9]* *.uc *.uc.* *.cfastq *accnos *biom *groups *logfile *map *scores *stk *summary *taxonomy *tree *txt *names *count_table
-#mv ${PREFIX}_R1.fasta.save ${PREFIX}_R1.fasta
-#mv ${PREFIX}_R2.fasta.save ${PREFIX}_R2.fasta
-#mv ${PREFIX}_paired.fasta.save ${PREFIX}_paired.fasta
+  rm -f *.fasta *.fasta.[0-9]* *.uc *.uc.* *.clean.fastq *accnos *biom *groups *logfile *map *scores *stk *summary *taxonomy *tree *txt *names *count_table
 elif [ $CLEAN = 'no' ]
 then
-echo "No cleanup performed."
+  echo "No cleanup performed."
 fi
 echo "Done"

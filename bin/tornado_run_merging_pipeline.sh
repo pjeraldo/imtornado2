@@ -41,9 +41,9 @@ isitthere $MAPPING
 cut -f 1 $MAPPING | sed '/^#/d' > $WORKSPACE/ids.txt
 #SANITY CHECKS
 #count the number of samples
-NSAMPLES=`cat $WORKSPACE/ids.txt| wc -l`
+NSAMPLES=$(cat $WORKSPACE/ids.txt| wc -l)
 #count the number of fastq files in the directory. Assume paired end. COunt only R1.
-NREAD1=`ls *R1*fastq|wc -l`
+NREAD1=$(ls *${SPACER}*R1*fastq|wc -l)
 #are they equal?
 [ $NSAMPLES == $NREAD1 ] || die 1 "Number of samples in mapping does not match number of fastq files."
 
@@ -61,7 +61,7 @@ done
 
 #Merge reads with USEARCH7
 
-for name in `cat $WORKSPACE/ids.txt`
+for name in $(cat $WORKSPACE/ids.txt)
 do
 $USEARCH7 -fastq_mergepairs ${name}${SPACER}*R1*fastq -reverse ${name}${SPACER}*R2*fastq -fastq_truncqual 3 -fastq_minovlen $MINIMUM_OVERLAP -minhsp $MINIMUM_OVERLAP -fastqout $WORKSPACE/${name}_M.fastq
 done
@@ -70,7 +70,7 @@ done
 cd $WORKSPACE
 #Convert FASTQ to FASTA
 echo "Converting FASTQ to FASTA, and rename IDs according to sample name"
-for name in `cat ids.txt`
+for name in $(cat ids.txt)
 do
 tornado_convert_and_rename_ids.py ${name}_M.fastq ${name}_M.fasta
 done
@@ -79,7 +79,7 @@ done
 echo "Remove ambigs..."
 #no check for polys... let OTUing tacke care of this
 #there has to be a faster way to do this.
-for name in `cat ids.txt`
+for name in $(cat ids.txt)
 do
 tornado_remove_ambigs.sh ${name}_M.fasta ${name}_M.trim.fasta
 done
@@ -202,7 +202,7 @@ else
   #split the fasta into 1 GB chunks, 
   gt splitfasta -targetsize 1000 ${PREFIX}_M.fasta
   #how many we have?
-  COUNT=`ls ${PREFIX}_M.fasta.*|wc -l`
+  COUNT=$(ls ${PREFIX}_M.fasta.*|wc -l)
   for i in $(seq $COUNT)
   do
   $USEARCH7 -threads $NPROC -usearch_global ${PREFIX}_M.fasta.${i} -db ${PREFIX}_M.otus.final.fasta -strand plus -id 0.97 -uc ${PREFIX}_M.uc.${i}
