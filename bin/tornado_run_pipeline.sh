@@ -129,7 +129,7 @@ if [[ $CONSENSUS_TAXONOMY == "1" ]]
   then
   #unique samples
   mothur "#unique.seqs(fasta=${PREFIX}.padded.fasta)"
-  mothur "#classify.seqs(fasta=${PREFIX}_R1.unique.fasta-${PREFIX}_R2.unique.fasta-${PREFIX}.padded.unique.fasta, name=${PREFIX}_R1.names-${PREFIX}_R2.names-${PREFIX}.padded.names, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC})"
+  mothur "#classify.seqs(fasta=${PREFIX}_R1.unique.fasta-${PREFIX}_R2.unique.fasta-${PREFIX}.padded.unique.fasta, name=${PREFIX}_R1.names-${PREFIX}_R2.names-${PREFIX}.padded.names, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, cutoff=${TAXCUTOFF}, processors=${NPROC})"
 fi
 
 #OTU R1 and R2, separately
@@ -199,7 +199,7 @@ tornado_otu_renamer.py ${PREFIX}_paired.otus.gapped.fasta ${PREFIX}_paired.tax.f
 #it works!!
 
 #get the taxonomy of the representatives
-mothur "#classify.seqs(fasta=${PREFIX}_R1.otus2.fasta-${PREFIX}_R2.otus2.fasta-${PREFIX}_paired.tax.fasta, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, processors=${NPROC}, iters=1000)"
+mothur "#classify.seqs(fasta=${PREFIX}_R1.otus2.fasta-${PREFIX}_R2.otus2.fasta-${PREFIX}_paired.tax.fasta, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, processors=${NPROC}, iters=100, cutoff=${TAXCUTOFF})"
 
 #copy the taxonomy files to the results
 cp ${PREFIX}_R1.otus2.${TAXONOMY}.wang.taxonomy ../$RESULTS/${PREFIX}_R1.probs.taxonomy
@@ -207,7 +207,7 @@ cp ${PREFIX}_R2.otus2.${TAXONOMY}.wang.taxonomy ../$RESULTS/${PREFIX}_R2.probs.t
 cp ${PREFIX}_paired.tax.${TAXONOMY}.wang.taxonomy ../$RESULTS//${PREFIX}_paired.probs.taxonomy
 
 #do this again, with no support values
-mothur "#classify.seqs(fasta=${PREFIX}_R1.otus2.fasta-${PREFIX}_R2.otus2.fasta-${PREFIX}_paired.tax.fasta, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC})"
+mothur "#classify.seqs(fasta=${PREFIX}_R1.otus2.fasta-${PREFIX}_R2.otus2.fasta-${PREFIX}_paired.tax.fasta, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC}, iters=100, cutoff=${TAXCUTOFF})"
 
 echo "Filter bad reads..."
 #find the ones that are obviously not 16S

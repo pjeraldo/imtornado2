@@ -16,6 +16,12 @@ MODEL=bacteria.cm
 #Not used for merging pipeline
 MINIMUM_LENGTH=187
 
+#Trimming length for OTU steps... YMMV here. These are suggestions
+#for 500 cycle Illumina kits.
+#Not used for merging pipeline
+R1_TRIM=250
+R2_TRIM=200
+
 #Taxonomy database to use.
 #Currently we provide 'rdp9' (RDP database, training set 9)
 #Assignments are not reliable below genus level.
@@ -25,11 +31,13 @@ MINIMUM_LENGTH=187
 #where TAXONOMY is defined below
 TAXONOMY=rdp9
 
-#Trimming length for OTU steps... YMMV here. These are suggestions
-#for 500 cycle Illumina kits.
-#Not used for merging pipeline
-R1_TRIM=250
-R2_TRIM=200
+#Taxonomy cutoffs
+#When classifying the reads, mothur has a cutoff for the
+#probability at that the assignment at that level is correct.
+#If below the cutoff, mothur will report that assignment as "unclassified"
+#at that particular level.
+#mothur default is 0 (from a range from 0 to 100). 
+TAXCUTOFF=0
 
 #Set this to 1 if you wish to run consensus taxonomy 
 #instead of taxonomy of the OTU representative.

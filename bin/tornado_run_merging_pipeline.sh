@@ -94,7 +94,7 @@ isitthere ${PREFIX}_M.fasta
 if [ $CONSENSUS_TAXONOMY = "1" ]
 then
 #unique samples
-mothur "#classify.seqs(fasta=${PREFIX}_M.unique.fasta name=${PREFIX}_M.names, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC})"
+mothur "#classify.seqs(fasta=${PREFIX}_M.unique.fasta name=${PREFIX}_M.names, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC}, iters=100, cutoff=${TAXCUTOFF})"
 fi
 
 if [[ -n $VSEARCH ]]
@@ -128,13 +128,13 @@ echo "Rename otu ids..."
 tornado_otu_renamer.py ${PREFIX}_M.otus.fasta ${PREFIX}_M.otus2.fasta
 
 #get the taxonomy of the representatives
-mothur "#classify.seqs(fasta=${PREFIX}_M.otus2.fasta, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, processors=${NPROC}, iters=1000)"
+mothur "#classify.seqs(fasta=${PREFIX}_M.otus2.fasta, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, processors=${NPROC}, iters=100, cutoff=${TAXCUTOFF})"
 
 #copy the taxonomy files to the results
 cp ${PREFIX}_M.otus2.${TAXONOMY}.wang.taxonomy ../$RESULTS/${PREFIX}_M.probs.taxonomy
 
 #do this again, with no support values
-mothur "#classify.seqs(fasta=${PREFIX}_M.otus2.fasta, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC})"
+mothur "#classify.seqs(fasta=${PREFIX}_M.otus2.fasta, taxonomy=${DATA}/${TAXONOMY}.taxonomy, template=${DATA}/${TAXONOMY}.fna, probs=false, processors=${NPROC}, iters=100, cutoff=${TAXCUTOFF})"
 
 echo "Filter bad reads..."
 #find the ones that are obviously not 16S
