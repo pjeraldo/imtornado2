@@ -120,8 +120,8 @@ tornado_keep_reads_of_length.py $R2_TRIM ${PREFIX}_R2.fasta ${PREFIX}_R2.keep.fa
 #First, pick out the common ids
 echo "Pick common ids..."
 
-tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R1.keep.fasta ${PREFIX}_R1.common.fasta
-tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R2.keep.fasta ${PREFIX}_R2.common.fasta
+tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R1.fasta ${PREFIX}_R1.common.fasta
+tornado_read_picker.py ${PREFIX}.common.accnos ${PREFIX}_R2.fasta ${PREFIX}_R2.common.fasta
 #flatten out the reads
 echo "Flatten read files..."
 tornado_flatten_fasta.py -i ${PREFIX}_R1.common.fasta -o ${PREFIX}_R1.common.flat.fasta
@@ -133,6 +133,10 @@ echo "Concatenate read pairs"
 
 paste -d 'N' ${PREFIX}_R1.common.flat.fasta ${PREFIX}_R2.common.flat.fasta | awk 'NR%2 ==0; NR%2 ==1 {sub(/N>.*/,""); print}' > ${PREFIX}.padded.fasta
 awk 'NR%2 == 1; NR%2 == 0 {sub(/N/,""); print}' ${PREFIX}.padded.fasta > ${PREFIX}_paired.fasta
+
+tornado_keep_reads_of_length.py $[R1_TRIM + R2_TRIM] ${PREFIX}_paired.fasta ${PREFIX}_paired.keep.fasta
+
+tornado_keep_reads_of_length.py $[1 + R1_TRIM + R2_TRIM] ${PREFIX}_padded.fasta ${PREFIX}_padded.keep.fasta
 
 #calculate overall taxonomy if consensus is set
 if [[ $CONSENSUS_TAXONOMY == "1" ]]
@@ -151,13 +155,13 @@ then
 
   $VSEARCH -derep_fulllength ${PREFIX}_R1.keep.fasta -output ${PREFIX}_R1.derep.fasta -sizeout
   $VSEARCH -derep_fulllength ${PREFIX}_R2.keep.fasta -output ${PREFIX}_R2.derep.fasta -sizeout
-  $VSEARCH -derep_fulllength ${PREFIX}_paired.fasta -output ${PREFIX}_paired.derep.fasta -sizeout
+  $VSEARCH -derep_fulllength ${PREFIX}_paired.keep.fasta -output ${PREFIX}_paired.derep.fasta -sizeout
 
 else
   #use mothur for this for now
   mothur "#unique.seqs(fasta=${PREFIX}_R1.keep.fasta)"
   mothur "#unique.seqs(fasta=${PREFIX}_R2.keep.fasta)"
-  mothur "#unique.seqs(fasta=${PREFIX}_paired.fasta)"
+  mothur "#unique.seqs(fasta=${PREFIX}_paired.keep.fasta)"
 
   #get the "counts" .. returns PREFIX_R?.seq.count
   mothur "#count.seqs(name=${PREFIX}_R1.names)"
@@ -169,13 +173,13 @@ else
   echo "Annotating unique sizes..."
   echo "R1..."
 
-  tornado_annotate_read_sizes.py $R1_TRIM ${PREFIX}_R1.unique.fasta ${PREFIX}_R1.count_table ${PREFIX}_R1.derep.fasta
+  tornado_annotate_read_sizes.py $R1_TRIM ${PREFIX}_R1.keep.unique.fasta ${PREFIX}_R1.count_table ${PREFIX}_R1.derep.fasta
   echo "R2..."
 
-  tornado_annotate_read_sizes.py $R2_TRIM ${PREFIX}_R2.unique.fasta ${PREFIX}_R2.count_table ${PREFIX}_R2.derep.fasta
+  tornado_annotate_read_sizes.py $R2_TRIM ${PREFIX}_R2.keep.unique.fasta ${PREFIX}_R2.count_table ${PREFIX}_R2.derep.fasta
   echo "Paired..."
 
-  tornado_annotate_read_sizes.py $[R1_TRIM + R2_TRIM] ${PREFIX}_paired.unique.fasta ${PREFIX}_paired.count_table ${PREFIX}_paired.derep.fasta
+  tornado_annotate_read_sizes.py $[R1_TRIM + R2_TRIM] ${PREFIX}_paired.keep.unique.fasta ${PREFIX}_paired.count_table ${PREFIX}_paired.derep.fasta
 
 fi
 
