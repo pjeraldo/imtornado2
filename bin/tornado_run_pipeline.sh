@@ -136,7 +136,7 @@ awk 'NR%2 == 1; NR%2 == 0 {sub(/N/,""); print}' ${PREFIX}.padded.fasta > ${PREFI
 
 tornado_keep_reads_of_length.py $[R1_TRIM + R2_TRIM] ${PREFIX}_paired.fasta ${PREFIX}_paired.keep.fasta
 
-tornado_keep_reads_of_length.py $[1 + R1_TRIM + R2_TRIM] ${PREFIX}_padded.fasta ${PREFIX}_padded.keep.fasta
+tornado_keep_reads_of_length.py $[1 + R1_TRIM + R2_TRIM] ${PREFIX}.padded.fasta ${PREFIX}_padded.keep.fasta
 
 #calculate overall taxonomy if consensus is set
 if [[ $CONSENSUS_TAXONOMY == "1" ]]
