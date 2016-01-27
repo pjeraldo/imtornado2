@@ -97,5 +97,5 @@ TRIMMOMATIC=/path/to/trimmomatic-0.32.jar
 GZIP=gz
 
 #Advanced settings. Do not modify unless you know what you are doing.
-TORNADO2=/path/to/IM-TORNADO-2.0.3
+TORNADO2=/path/to/IM-TORNADO-2.0.3.3
 DATA=$TORNADO2/data

@@ -1,8 +1,13 @@
 # IM-TORNADO: A pipeline for 16S reads from paired-end libraries
 
-This is the documentation for the IM-TORNADO pipeline, currently at version 2.0.3.2
+This is the documentation for the IM-TORNADO pipeline, currently at version 2.0.3.3
 
 ## Changelog
+
+### Version 2.0.3.3
+
+* Feature - Added capability to specify cutoffs for taxonomy classification using mothur. Look for the TAXCUTOFF parameter in the "tornado_params.sh" file.
+* Miscellaneous - Some code cleanup.
 
 ### Miscellaneous
 

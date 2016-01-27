@@ -4,10 +4,10 @@
 Created on Thu Sep  5 13:41:48 2013
 """
 __author__ = "Patricio Jeraldo"
-__copyright__ = "Copyright 2014, Mayo Foundation for Medical Education and Research "
+__copyright__ = "Copyright 2014-2016, Mayo Foundation for Medical Education and Research "
 __credits__ = ["Patricio Jeraldo", "Nicholas Chia"]
 __license__ = "GPL"
-__version__ = "2.0.3"
+__version__ = "2.0.3.3"
 __maintainer__ = "Patricio Jeraldo"
 __email__ = "jeraldo.patricio@mayo.edu"
 __status__ = "Production"
