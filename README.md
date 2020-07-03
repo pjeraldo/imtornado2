@@ -1,6 +1,10 @@
 # IM-TORNADO: A pipeline for 16S reads from paired-end libraries
 
-This is the documentation for the IM-TORNADO pipeline, currently at version 2.0.3.3
+![Maintenance](https://img.shields.io/maintenance/no/2017?style=flat-square)
+
+This pipeline is obsolete, and this repository exists for archival purposes only. I recommend [DADA2](https://benjjneb.github.io/dada2/) to process paired-end amplicon reads that do not overlap.
+
+This is the documentation for the IM-TORNADO pipeline, final version 2.0.3.3.
 
 ## Changelog
 
